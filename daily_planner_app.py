@@ -1,48 +1,66 @@
-import tkinter as tk
-from tkinter import messagebox
+import sys
+from PyQt5 import QtWidgets, QtCore
+from daily_planner_logic import UserProfile
 
-class DailyPlannerApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Daily Planner App")
+class DailyPlannerApp(QtWidgets.QWidget):
+    def __init__(self):
+        super().__init__()
 
-        # Create frames
-        self.top_frame = tk.Frame(self.root)
-        self.middle_frame = tk.Frame(self.root)
-        self.bottom_frame = tk.Frame(self.root)
+        self.user = UserProfile()
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle("Daily Planner App")
 
         # Create labels and entry fields
-        self.task_label = tk.Label(self.top_frame, text="Task:")
-        self.task_entry = tk.Entry(self.top_frame, width=40)
-        self.date_label = tk.Label(self.top_frame, text="Date:")
-        self.date_entry = tk.Entry(self.top_frame, width=40)
+        self.task_label = QtWidgets.QLabel("Task:")
+        self.task_entry = QtWidgets.QLineEdit()
+        self.date_label = QtWidgets.QLabel("Due Date:")
+        self.date_entry = QtWidgets.QLineEdit()
+
+        # Connect the returnPressed signal to the add_task method
+        self.task_entry.returnPressed.connect(self.add_task)
 
         # Create buttons
-        self.add_button = tk.Button(self.middle_frame, text="Add Task", command=self.add_task)
-        self.view_button = tk.Button(self.middle_frame, text="View Tasks", command=self.view_tasks)
-        self.exit_button = tk.Button(self.bottom_frame, text="Exit", command=self.root.quit)
+        self.add_button = QtWidgets.QPushButton("Add Task")
+        self.add_button.clicked.connect(self.add_task)
+        self.view_button = QtWidgets.QPushButton("View Tasks")
+        self.view_button.clicked.connect(self.view_tasks)
+        self.exit_button = QtWidgets.QPushButton("Exit")
+        self.exit_button.clicked.connect(self.close)
+
+        # Create a QListWidget to display tasks
+        self.task_list = QtWidgets.QListWidget()
 
         # Layout
-        self.top_frame.pack()
-        self.middle_frame.pack()
-        self.bottom_frame.pack()
-        self.task_label.pack(side=tk.LEFT)
-        self.task_entry.pack(side=tk.LEFT)
-        self.date_label.pack(side=tk.LEFT)
-        self.date_entry.pack(side=tk.LEFT)
-        self.add_button.pack(side=tk.LEFT)
-        self.view_button.pack(side=tk.LEFT)
-        self.exit_button.pack(side=tk.BOTTOM)
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(self.task_label)
+        layout.addWidget(self.task_entry)
+        layout.addWidget(self.date_label)
+        layout.addWidget(self.date_entry)
+        layout.addWidget(self.add_button)
+        layout.addWidget(self.view_button)
+        layout.addWidget(self.exit_button)
+        layout.addWidget(self.task_list)
+
+        self.setLayout(layout)
 
     def add_task(self):
-        # Add task logic here
-        pass
+        # print("Add task called")
+        task_name = self.task_entry.text()
+        due_date = self.date_entry.text()
+        self.user.tasks.append({"name": task_name, "due_date": due_date})
+        self.task_entry.clear()
+        self.date_entry.clear()
+        self.task_list.addItem(f"{task_name} (Due: {due_date})")
 
     def view_tasks(self):
-        # View tasks logic here
-        pass
+        self.task_list.clear()
+        for task in self.user.tasks:
+            self.task_list.addItem(f"{task['name']} (Due: {task['due_date']})")
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = DailyPlannerApp(root)
-    root.mainloop()
+    app = QtWidgets.QApplication(sys.argv)
+    window = DailyPlannerApp()
+    window.show()
+    sys.exit(app.exec_())
