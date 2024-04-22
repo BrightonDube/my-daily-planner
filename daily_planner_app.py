@@ -28,9 +28,14 @@ class DailyPlannerApp(QtWidgets.QWidget):
         self.view_button.clicked.connect(self.view_tasks)
         self.exit_button = QtWidgets.QPushButton("Exit")
         self.exit_button.clicked.connect(self.close)
+        self.completed_button = QtWidgets.QPushButton("Mark as Completed")
+        self.completed_button.clicked.connect(self.mark_completed)
 
         # Create a QListWidget to display tasks
         self.task_list = QtWidgets.QListWidget()
+
+        # Create a QListWidget to display completed tasks
+        self.completed_list = QtWidgets.QListWidget()
 
         # Layout
         layout = QtWidgets.QVBoxLayout()
@@ -41,12 +46,13 @@ class DailyPlannerApp(QtWidgets.QWidget):
         layout.addWidget(self.add_button)
         layout.addWidget(self.view_button)
         layout.addWidget(self.exit_button)
+        layout.addWidget(self.completed_button)
         layout.addWidget(self.task_list)
+        layout.addWidget(self.completed_list)
 
         self.setLayout(layout)
 
     def add_task(self):
-        # print("Add task called")
         task_name = self.task_entry.text()
         due_date = self.date_entry.text()
         self.user.tasks.append({"name": task_name, "due_date": due_date})
@@ -58,6 +64,16 @@ class DailyPlannerApp(QtWidgets.QWidget):
         self.task_list.clear()
         for task in self.user.tasks:
             self.task_list.addItem(f"{task['name']} (Due: {task['due_date']})")
+
+    def mark_completed(self):
+        selected_index = self.task_list.currentRow()
+        if selected_index >= 0:
+            task = self.user.tasks.pop(selected_index)
+            #print("Task:", task)  # Add this print statement
+            self.completed_list.addItem(f"{task['name']} (Due: {task['due_date']})")
+            self.task_list.clear()
+            for task in self.user.tasks:
+                self.task_list.addItem(f"{task['name']} (Due: {task['due_date']})")
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
